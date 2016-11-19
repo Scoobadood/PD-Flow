@@ -33,7 +33,9 @@ PD_flow_opencv::PD_flow_opencv(unsigned int rows_config,
 	const char *intensity_filename_2,
 	const char *depth_filename_1,
 	const char *depth_filename_2,
-	const char* output_filename_root) {
+	const char* output_filename_root,
+    const bool no_show,
+    const bool no_scale) {
 
     rows = rows_config;      //Maximum size of the coarse-to-fine scheme - Default 240 (QVGA)
     cols = rows*320/240;
@@ -74,6 +76,8 @@ PD_flow_opencv::PD_flow_opencv(unsigned int rows_config,
     this->depth_filename_1 = depth_filename_1;
     this->depth_filename_2 = depth_filename_2;
     this->output_filename_root = output_filename_root;
+    this->no_show = no_show;
+    this->no_scale = no_scale;
 }
 
 
@@ -194,27 +198,30 @@ void PD_flow_opencv::initializeCUDA()
 
 void PD_flow_opencv::showImages()
 {
-	const unsigned int dispx = intensity1.cols + 20;
-	const unsigned int dispy = intensity1.rows + 20;
+	if( !no_show ) {
 
-	//Show images with OpenCV windows
-	cv::namedWindow("I1", cv::WINDOW_AUTOSIZE);
-	cv::moveWindow("I1",10,10);
-	cv::imshow("I1", intensity1);
+		const unsigned int dispx = intensity1.cols + 20;
+		const unsigned int dispy = intensity1.rows + 20;
 
-	cv::namedWindow("Z1", cv::WINDOW_AUTOSIZE);
-	cv::moveWindow("Z1",dispx,10);
-	cv::imshow("Z1", depth1);
+		//Show images with OpenCV windows
+		cv::namedWindow("I1", cv::WINDOW_AUTOSIZE);
+		cv::moveWindow("I1",10,10);
+		cv::imshow("I1", intensity1);
 
-	cv::namedWindow("I2", cv::WINDOW_AUTOSIZE);
-	cv::moveWindow("I2",10,dispy);
-	cv::imshow("I2", intensity2);
+		cv::namedWindow("Z1", cv::WINDOW_AUTOSIZE);
+		cv::moveWindow("Z1",dispx,10);
+		cv::imshow("Z1", depth1);
 
-	cv::namedWindow("Z2", cv::WINDOW_AUTOSIZE);
-	cv::moveWindow("Z2",dispx,dispy);
-	cv::imshow("Z2", depth2);
+		cv::namedWindow("I2", cv::WINDOW_AUTOSIZE);
+		cv::moveWindow("I2",10,dispy);
+		cv::imshow("I2", intensity2);
 
-	cv::waitKey(30);
+		cv::namedWindow("Z2", cv::WINDOW_AUTOSIZE);
+		cv::moveWindow("Z2",dispx,dispy);
+		cv::imshow("Z2", depth2);
+
+	 	cv::waitKey(30);
+	}
 }
 
 bool PD_flow_opencv::loadRGBDFrames()
@@ -354,11 +361,16 @@ void PD_flow_opencv::showAndSaveResults( )
 {
 	cv::Mat sf_image = createImage( );
 
-	//Show the scene flow as an RGB image	
-	cv::namedWindow("SceneFlow", cv::WINDOW_NORMAL);
-    cv::moveWindow("SceneFlow",width - cols/2,height - rows/2);
-	cv::imshow("SceneFlow", sf_image);
-	cv::waitKey(100000);
+	if( !no_show ) {
+		//Show the scene flow as an RGB image	
+		cv::namedWindow("SceneFlow", cv::WINDOW_NORMAL);
+    	cv::moveWindow("SceneFlow",width - cols/2,height - rows/2);
+		cv::imshow("SceneFlow", sf_image);
+
+		printf("\nPush any key over the scene flow image to finish\n");
+
+		cv::waitKey(100000);
+	}
 
 	saveResults( sf_image );
 }

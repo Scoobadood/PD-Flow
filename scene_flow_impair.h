@@ -95,6 +95,12 @@ public:
     const char *depth_filename_2;
     const char *output_filename_root;
 
+    // Flag indicating that input and output images should not be displayed
+    bool no_show;   
+
+    // Fl;ag indicating that input depth images are not scaled by 5000
+    bool no_scale;
+
 	//Methods
 	bool loadRGBDFrames();
     void createImagePyramidGPU();
@@ -111,7 +117,9 @@ public:
                     const char *intensity_filename_2="i2.png", 
                     const char *depth_filename_1="z1.png", 
                     const char *depth_filename_2="z2.png", 
-                    const char* output_filename_root="pdflow");
+                    const char* output_filename_root="pdflow",
+                    const bool no_show='false',
+                    const bool no_scale='false');
 };
 
 

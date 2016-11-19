@@ -40,6 +40,7 @@ struct Launch_args {
     const char      *depth_filename_2;
     const char      *output_filename_root;
     bool            no_show;
+    bool			no_scale;
 };
 
 /**
@@ -117,6 +118,8 @@ bool parse_arguments( int num_arg, char *argv[], Launch_args& args) {
 			}
 		} else if ( strcmp( "--no-show", argv[arg_idx]) == 0 ) {
 			args.no_show = true;
+		} else if ( strcmp( "--no-scale", argv[arg_idx]) == 0 ) {
+			args.no_scale = true;
 		} else {
 			parsed_ok = false;
 			break;
@@ -150,6 +153,7 @@ int main(int num_arg, char *argv[])
  		printf(" --z2 <filename> : The second depth image file name. Defaults to z2.png\n" );
  		printf(" --out <filename>: The output file name root. Omit file extension. Defaults to pdflow\n" );
  		printf(" --no-show       : Don't show the output results. Useful for batch processing\n");
+ 		printf(" --no-scale      : Input data is not scaled.\n");
         getwchar();
 		return 1;
 	}
@@ -163,7 +167,9 @@ int main(int num_arg, char *argv[])
 							args.intensity_filename_2, 
 							args.depth_filename_1, 
 							args.depth_filename_2, 
-							args.output_filename_root);
+							args.output_filename_root,
+							args.no_show,
+							args.no_scale);
 
 	//Initialize CUDA and set some internal variables 
     sceneflow.initializeCUDA();
@@ -172,19 +178,11 @@ int main(int num_arg, char *argv[])
 
 	if (imloaded == 1)
 	{
-		if( args.no_show == false ) 
-		{
-			sceneflow.showImages();	
-		}
+		sceneflow.showImages();	
 		sceneflow.solveSceneFlowGPU();
-		if( args.no_show ) {
-			cv::Mat image = sceneflow.createImage( );
-			sceneflow.saveResults( image );
-		} else {
-			sceneflow.showAndSaveResults();
-		}
+		sceneflow.showAndSaveResults();
+		
 		sceneflow.freeGPUMemory();
-        printf("\nPush any key over the scene flow image to finish\n");
 	}
 
 	return 0;
