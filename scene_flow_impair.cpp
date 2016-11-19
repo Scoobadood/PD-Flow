@@ -248,9 +248,10 @@ bool PD_flow_opencv::loadRGBDFrames()
 		return 0;
 	}
 
-	float scale_factor = 1.0f;
+	// Get data in metres
+	float scale_factor = 1.0f / 1000.0f;
 	if( !no_scale ) {
-		scale_factor /= 5000.0f;
+		scale_factor /= 5.0f;
 	}
 
 	depth1.convertTo(depth_float, CV_32FC1, scale_factor;
